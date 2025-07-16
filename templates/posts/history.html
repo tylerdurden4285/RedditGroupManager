@@ -1,0 +1,535 @@
+{% extends "base.html" %}
+
+{% block head_scripts %}
+{{ super() }}
+<style>
+    #detailsModal a {
+        color: #2563EB;
+        text-decoration: underline;
+        word-break: break-all;
+    }
+    #detailsModal a:hover {
+        color: #1e40af;
+    }
+    #cleanupModal,
+    #detailsModal,
+    #deleteHistoryModal,
+    #undoSelectedModal,
+    #repostSelectedModal {
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Post History - Reddit Group Manager{% endblock %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-8 max-w-6xl">
+    <div class="flex flex-col justify-between items-start mb-6 gap-4">
+
+        <div class="flex flex-col gap-3 w-full lg:flex-1">
+            <h2 class="text-2xl font-bold text-[#1b0e0f]">Post History</h2>
+
+            <!-- Search box -->
+            <form method="GET" action="{{ url_for('posts_history.post_history') }}" class="flex flex-wrap items-end gap-2 w-full lg:flex-nowrap">
+                <div class="relative w-full lg:w-[60%]">
+                    <input id="search-input" type="text" name="search" value="{{ search_query or '' }}" placeholder="Search posts..." class="w-full lg:w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    {% if current_filter %}
+                        <input type="hidden" name="post_type" value="{{ current_filter }}" class="">
+                    {% endif %}
+                    <button id="clear-search-btn" type="button" class="absolute inset-y-0 right-8 flex items-center pr-3 text-gray-400 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </div>
+                <input id="date-range-picker" type="text" class="w-full lg:w-[40%] px-3 py-2 border border-gray-300 rounded-md date-input" placeholder="Select date range">
+                <input id="start-date-input" type="hidden" name="start_date" value="{{ start_date or '' }}">
+                <input id="end-date-input" type="hidden" name="end_date" value="{{ end_date or '' }}">
+                <button id="reset-dates-btn" type="button" class="px-3 py-2 border border-gray-300 rounded-md h-[42px] whitespace-nowrap">Reset Dates</button>
+            </form>
+            
+            <!-- Filter buttons -->
+            <div class="flex gap-2 mt-2">
+                <a href="{{ url_for('posts_history.post_history', search=search_query, start_date=start_date, end_date=end_date) }}" class="px-3 py-2 rounded-md border {% if not current_filter %}bg-indigo-500 text-white border-indigo-500{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %} text-sm font-medium">
+                    All
+                </a>
+                <a href="{{ url_for('posts_history.post_history', post_type='text', search=search_query, start_date=start_date, end_date=end_date) }}" class="px-3 py-2 rounded-md border {% if current_filter == 'text' %}bg-blue-500 text-white border-blue-500{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %} text-sm font-medium">
+                    Text
+                </a>
+                <a href="{{ url_for('posts_history.post_history', post_type='link', search=search_query, start_date=start_date, end_date=end_date) }}" class="px-3 py-2 rounded-md border {% if current_filter == 'link' %}bg-purple-500 text-white border-purple-500{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %} text-sm font-medium">
+                    Link
+                </a>
+                <a href="{{ url_for('posts_history.post_history', post_type='image', search=search_query, start_date=start_date, end_date=end_date) }}" class="px-3 py-2 rounded-md border {% if current_filter == 'image' %}bg-green-500 text-white border-green-500{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %} text-sm font-medium">
+                    Image
+                </a>
+                <a href="{{ url_for('posts_history.post_history', post_type='scheduled', search=search_query, start_date=start_date, end_date=end_date) }}" class="px-3 py-2 rounded-md border {% if current_filter == 'scheduled' %}bg-orange-500 text-white border-orange-500{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %} text-sm font-medium">
+                    Scheduled
+                </a>
+            </div>
+        </div>
+        
+        <div class="flex space-x-2 self-start">
+            <div class="dropdown relative inline-block">
+                <button id="createDropdownButton" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 whitespace-nowrap">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Create Post
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div id="createDropdownMenu" class="dropdown-menu hidden absolute left-0 z-10 mt-1 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div class="py-1">
+                        <a href="{{ url_for('posts_create.new_text_post') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                                </svg>
+                                Text Post
+                            </div>
+                        </a>
+                        <a href="{{ url_for('posts_create.new_link_post') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
+                                </svg>
+                                Link Post
+                            </div>
+                        </a>
+                        <a href="{{ url_for('posts_create.new_image_post') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                                </svg>
+                                Image Post
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Post History section -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">All Posts</h3>
+            <div class="relative inline-block">
+                <button id="deleteHistoryDropdownButton" type="button" class="inline-flex items-center px-4 py-2 text-sm text-red-600 border border-red-600 rounded-full hover:bg-red-50">
+                    Delete all post history
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <button id="undoSelectedButton" type="button" class="hidden inline-flex items-center px-4 py-2 text-sm text-red-600 border border-red-600 rounded-full hover:bg-red-50 ml-2">Undo</button>
+                <button id="editSelectedButton" type="button" class="hidden inline-flex items-center px-4 py-2 text-sm text-indigo-600 border border-indigo-600 rounded-full hover:bg-indigo-50 ml-2">Edit</button>
+                <button id="repostSelectedButton" type="button" class="hidden inline-flex items-center px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 ml-2">Repost</button>
+                <div id="deleteHistoryDropdownMenu" class="hidden absolute right-0 z-10 mt-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <button type="button" class="cleanup-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="{{ url_for('posts_actions.clear_stuck_posts') }}" data-message="This will mark all stuck or expired posts as failed. Continue?">
+                        Mark stuck posts as failed
+                    </button>
+                    <button type="button" class="cleanup-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="{{ url_for('posts_actions.mark_overdue_scheduled_posts') }}" data-message="This will mark any overdue scheduled posts as overdue. Continue?">
+                        Mark overdue scheduled posts
+                    </button>
+                    <button type="button" class="cleanup-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="{{ url_for('posts_actions.clear_overdue_scheduled_posts') }}" data-message="This will mark all overdue posts as failed. Continue?">
+                        Mark overdue posts as failed
+                    </button>
+                    <button type="button" class="cleanup-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="{{ url_for('posts_actions.delete_failed_posts') }}" data-message="This will permanently delete and clear failed posts. Continue?">
+                        Delete and clear failed posts
+                    </button>
+                    <button type="button" class="cleanup-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="{{ url_for('posts_actions.delete_all_posts') }}" data-message="This deletes all your local post history and cannot be undone. Are you sure?">
+                        Delete all local post history
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if posts %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr class="bg-gray-100 border-b">
+                            <th class="py-3 px-4 text-left">
+                                <input type="checkbox" id="select-all-checkbox" />
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Created</th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Status</th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Campaign</th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Subreddit</th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Type</th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Details</th>
+                            <th class="py-3 px-4 text-left font-semibold text-sm">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-center">
+                                <input type="checkbox" class="post-select-checkbox" value="{{ post.id }}" {% if post.status == 'scheduled' or post.status == 'overdue' %}data-scheduled="{{ post.scheduled_for }}"{% endif %}/>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-600">
+                                {{ post.created_date }}<br>{{ post.created_time }}
+                            </td>
+                            <td class="py-3 px-4 text-sm">
+                                <span id="status-span-{{ post.id }}" class="px-2 py-1 rounded-full text-xs font-medium {% if post.status == 'posted' %}bg-green-100 text-green-800{% elif post.status == 'failed' or post.status == 'overdue' %}bg-red-100 text-red-800{% elif post.status == 'retrying' %}bg-yellow-100 text-yellow-800{% elif post.status == 'processing' %}bg-blue-100 text-blue-800{% elif post.status == 'waiting' %}bg-purple-100 text-purple-800{% elif post.status == 'awaiting' %}bg-yellow-100 text-yellow-800{% elif post.status == 'filtered' %}bg-red-100 text-red-800{% elif post.status == 'scheduled' %}bg-orange-100 text-orange-800{% else %}bg-gray-100 text-gray-800{% endif %}" title="{{ post.error_message }}">
+                                    {% if post.status == 'retrying' %}
+                                        retry {{ post.retry_count or 0 }}/{{ max_retries }}
+                                    {% else %}
+                                        {{ post.status or 'n/a' }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">{{ post.campaign }}</td>
+                            <td class="py-3 px-4">r/{{ post.subreddit }}</td>
+                            <td class="py-3 px-4">
+                                {% if post.post_type == 'text' %}
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Text</span>
+                                {% elif post.post_type == 'link' %}
+                                    <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">Link</span>
+                                {% elif post.post_type == 'image' %}
+                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Image</span>
+                                {% else %}
+                                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Post</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4">
+                                <button id="details-btn-{{ post.id }}" type="button" class="details-btn text-blue-600 hover:text-blue-800 underline" data-post='{{ post|tojson|safe }}'>Details</button>
+                            </td>
+                            <td id="reddit-url-cell-{{ post.id }}" class="py-3 px-4">
+                                {% if post.status == 'posted' %}
+                                <a href="{{ post.reddit_url }}" target="_blank" class="inline-flex items-center px-3 py-1 bg-indigo-500 text-white whitespace-nowrap rounded-full border border-indigo-500 hover:bg-indigo-600">See on Reddit</a>
+                                {% elif post.status == 'failed' %}
+                                <form method="post" class="repost-post-form" action="{{ url_for('posts_actions.repost_post', post_id=post.id) }}">
+                                    <button class="text-blue-600">Repost</button>
+                                </form>
+                                {% elif post.status == 'awaiting' %}
+                                <a href="{{ post.reddit_url }}" target="_blank" class="text-gray-500 underline">Awaiting Moderation</a>
+                                {% elif post.status == 'filtered' %}
+                                <a href="{{ post.reddit_url }}" target="_blank" class="text-gray-500 underline">Filtered by Reddit</a>
+                                {% elif post.status == 'undone' %}
+                                {% if post.reddit_url %}
+                                <a href="{{ post.reddit_url }}" target="_blank" class="text-gray-500 underline">Post Undone</a>
+                                {% else %}
+                                <span class="text-gray-500">Post Undone</span>
+                                {% endif %}
+                                {% elif post.status == 'processing' %}
+                                <span class="text-gray-500">Processing...</span>
+                                <button type="button" class="edit-schedule-btn text-blue-600 underline ml-2" data-post-id="{{ post.id }}" data-scheduled="{{ post.scheduled_for or '' }}">Edit</button>
+                                {% elif post.status == 'waiting' %}
+                                <span class="text-gray-500">Please Wait...</span>
+                                <button type="button" class="edit-schedule-btn text-blue-600 underline ml-2" data-post-id="{{ post.id }}" data-scheduled="{{ post.scheduled_for or '' }}">Edit</button>
+                                {% elif post.status == 'deleted' %}
+                                <span class="text-gray-500"{% if post.reddit_url %} title="{{ post.reddit_url }}"{% endif %}>Deleted</span>
+                                {% elif post.status == 'scheduled' %}
+                                <span class="text-gray-500">Scheduled for {{ post.scheduled_date }} {{ post.scheduled_time }}</span>
+                                {% elif post.status == 'overdue' %}
+                                <span class="text-gray-500">Overdue since {{ post.scheduled_date }} {{ post.scheduled_time }}</span>
+
+                                {% else %}
+                                <a href="{{ post.reddit_url }}" target="_blank" class="inline-flex items-center px-3 py-1 bg-indigo-500 text-white whitespace-nowrap rounded-full border border-indigo-500 hover:bg-indigo-600">See on Reddit</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <div>
+                    {% if page > 1 %}
+                        <a href="{{ url_for('posts_history.post_history', page=page-1, per_page=per_page, post_type=current_filter, search=search_query, start_date=start_date, end_date=end_date) }}" class="px-3 py-2 border rounded-md">Previous</a>
+                    {% endif %}
+                    {% if page < total_pages %}
+                        <a href="{{ url_for('posts_history.post_history', page=page+1, per_page=per_page, post_type=current_filter, search=search_query, start_date=start_date, end_date=end_date) }}" class="ml-2 px-3 py-2 border rounded-md">Next</a>
+                    {% endif %}
+                    <span class="ml-4 text-sm text-gray-600">Page {{ page }} of {{ total_pages }}</span>
+                </div>
+                <form id="perPageForm" method="get" class="flex items-center space-x-1">
+                    <input type="hidden" name="post_type" value="{{ current_filter or '' }}">
+                    <input type="hidden" name="search" value="{{ search_query or '' }}">
+                    <input type="hidden" name="start_date" value="{{ start_date or '' }}">
+                    <input type="hidden" name="end_date" value="{{ end_date or '' }}">
+                    <input type="hidden" name="page" value="1">
+                    <label for="per_page" class="text-sm">Per page:</label>
+                    <select id="per_page" name="per_page" class="border border-gray-300 rounded-md text-sm px-2 py-1 w-24" onchange="this.form.submit()">
+                        {% for n in [20, 50, 100] %}
+                            <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        {% else %}
+            <div class="text-center py-12 text-gray-500">
+                <p>You don't have any posts yet.</p>
+                <p class="mt-2">Create your first post using the button above.</p>
+            </div>
+        {% endif %}
+    </div>
+
+
+    <!-- Cleanup confirmation modal -->
+    <div id="cleanupModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-md p-6 w-80">
+            <p id="cleanupModalMessage" class="mb-4"></p>
+            <form id="cleanupForm" method="post">
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="cancelCleanup" class="px-4 py-2 rounded-full border">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-full bg-red-600 text-white">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Post details modal -->
+    <div id="detailsModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-md p-6 w-full max-w-lg">
+            <h3 id="detailsModalTitle" class="text-lg font-semibold mb-2"></h3>
+            <p id="detailsFlairContainer" class="mb-3 hidden">
+                <span id="detailsModalFlair" class="italic text-xs bg-blue-200 px-2 py-0.5 rounded"></span>
+            </p>
+            <div id="detailsModalBody" class="mt-4 space-y-4"></div>
+            <div class="mt-4 flex justify-end">
+                <button type="button" id="closeDetails" class="px-4 py-2 rounded-full border">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete history confirmation modal -->
+    <div id="deleteHistoryModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-4">Delete Post History</h2>
+            <p id="deleteHistoryModalMessage" class="mb-4">Are you sure you want to delete all your post history. This cannot be undone.</p>
+            <div class="flex justify-end space-x-2">
+                <button type="button" class="px-4 py-2 rounded bg-gray-200" onclick="document.getElementById('deleteHistoryModal').classList.add('hidden')">Cancel</button>
+                <form id="deleteHistoryForm" method="POST" action="{{ url_for('posts_history.delete_post_history') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="post_ids" id="delete-post-ids" value="" />
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Undo selected confirmation modal -->
+    <div id="undoSelectedModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-4">Undo Posts</h2>
+            <p id="undoSelectedModalMessage" class="mb-4">Are you sure you want to undo the selected posts?</p>
+            <div class="flex justify-end space-x-2">
+                <button type="button" id="cancelUndo" class="px-4 py-2 rounded bg-gray-200">Cancel</button>
+                <form id="undoSelectedForm" class="undo-post-form" method="POST" data-confirm="false" action="{{ url_for('posts_actions.undo_selected_posts') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="post_ids" id="undo-post-ids" value="" />
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Undo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit schedule modal -->
+    <div id="editScheduleModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-4">Edit Schedule</h2>
+            <form id="editScheduleForm" method="POST" action="{{ url_for('posts_actions.edit_scheduled_posts') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="post_ids" id="edit-schedule-ids" value="" />
+                <label for="edit-schedule-input" class="block text-sm font-medium mb-1">Schedule Time</label>
+                <input type="text" id="edit-schedule-input" name="schedule_time" class="w-full border border-gray-300 rounded-md px-3 py-2" />
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button type="button" id="cancelEditSchedule" class="px-4 py-2 rounded bg-gray-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Repost selected confirmation modal -->
+    <div id="repostSelectedModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-4">Repost Posts</h2>
+            <p id="repostSelectedModalMessage" class="mb-4">Are you sure you want to repost the selected posts?</p>
+            <div class="flex justify-end space-x-2">
+                <button type="button" id="cancelRepost" class="px-4 py-2 rounded bg-gray-200">Cancel</button>
+                <form id="repostSelectedForm" class="repost-post-form" method="POST" data-confirm="false" action="{{ url_for('posts_actions.repost_selected_posts') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="post_ids" id="repost-post-ids" value="" />
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Repost</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit schedule modal -->
+    <div id="editScheduleModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-2">Edit Schedule</h2>
+            <p class="mb-4 text-red-600 font-semibold">Attention: Editing defaults to +1 hour</p>
+            <form id="editScheduleForm" method="POST" action="/posts/update-schedule">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="post_id" id="edit-schedule-post-id" value="">
+                <div class="mb-4">
+                    <label for="new_scheduled_time" class="block text-sm font-medium text-gray-700 mb-1">New Time</label>
+                    <input type="datetime-local" id="new_scheduled_time" name="new_scheduled_time" class="border border-gray-300 rounded-md p-2 w-full">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="cancelEditSchedule" class="px-4 py-2 rounded bg-gray-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Post creation dropdown
+        const createBtn = document.getElementById('createDropdownButton');
+        const createMenu = document.getElementById('createDropdownMenu');
+        if (createBtn && createMenu) {
+            createBtn.addEventListener('click', function() {
+                createMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!createBtn.contains(event.target) && !createMenu.contains(event.target)) {
+                    createMenu.classList.add('hidden');
+                }
+            });
+        }
+
+        // Cleanup dropdown attached to delete history button
+        const historyBtn = document.getElementById('deleteHistoryDropdownButton');
+        const historyMenu = document.getElementById('deleteHistoryDropdownMenu');
+
+
+        // Cleanup modal logic
+        const cleanupModal = document.getElementById('cleanupModal');
+        const cleanupMessage = document.getElementById('cleanupModalMessage');
+        const cleanupForm = document.getElementById('cleanupForm');
+        const cancelCleanup = document.getElementById('cancelCleanup');
+        const undoModalInline = document.getElementById('undoSelectedModal');
+        const cancelUndo = document.getElementById('cancelUndo');
+        const repostModalInline = document.getElementById('repostSelectedModal');
+        const cancelRepost = document.getElementById('cancelRepost');
+
+        document.querySelectorAll('.cleanup-option').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const action = btn.dataset.action;
+                const msg = btn.dataset.message;
+                cleanupForm.action = action;
+                cleanupMessage.textContent = msg;
+                cleanupModal.classList.remove('hidden');
+                if (historyMenu) {
+                    historyMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        if (cancelCleanup) {
+            cancelCleanup.addEventListener('click', function() {
+                cleanupModal.classList.add('hidden');
+            });
+        }
+
+        if (cancelUndo && undoModalInline) {
+            cancelUndo.addEventListener('click', function() {
+                undoModalInline.classList.add('hidden');
+            });
+        }
+
+        if (cancelRepost && repostModalInline) {
+            cancelRepost.addEventListener('click', function() {
+                repostModalInline.classList.add('hidden');
+            });
+        }
+
+        // Details modal logic
+        const detailsModal = document.getElementById('detailsModal');
+        const detailsTitle = document.getElementById('detailsModalTitle');
+        const detailsFlair = document.getElementById('detailsModalFlair');
+        const detailsFlairContainer = document.getElementById('detailsFlairContainer');
+        const detailsBody = document.getElementById('detailsModalBody');
+        const closeDetails = document.getElementById('closeDetails');
+
+        document.querySelectorAll('.details-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const post = JSON.parse(btn.dataset.post);
+                detailsTitle.textContent = post.title || '';
+                const flair = post.flair_text || '';
+                if (flair.trim()) {
+                    detailsFlair.textContent = flair;
+                    detailsFlairContainer.classList.remove('hidden');
+                } else {
+                    detailsFlair.textContent = '';
+                    detailsFlairContainer.classList.add('hidden');
+                }
+                detailsBody.innerHTML = '';
+                if (post.post_type === 'image') {
+                    const imgSrc =
+                        (post.status === 'scheduled' || post.status === 'undone') && post.local_image_url
+                            ? post.local_image_url
+                            : post.content;
+                    if (imgSrc) {
+                        const img = document.createElement('img');
+                        img.src = imgSrc;
+                        img.alt = post.title || '';
+                        img.className = 'w-full mb-2';
+                        detailsBody.appendChild(img);
+                    }
+                } else if (post.post_type === 'link' && post.content) {
+                    const a = document.createElement('a');
+                    a.href = post.content;
+                    a.textContent = post.content;
+                    a.className = 'text-blue-600 underline';
+                    detailsBody.appendChild(a);
+                } else if (post.content) {
+                    const div = document.createElement('div');
+                    div.innerHTML = DOMPurify.sanitize(marked.parse(post.content));
+                    detailsBody.appendChild(div);
+                }
+                if (post.comment) {
+                    const c = document.createElement('div');
+                    c.innerHTML = DOMPurify.sanitize(marked.parse(post.comment));
+                    c.className = 'italic text-sm mt-2';
+                    detailsBody.appendChild(c);
+                }
+                if (post.error_message) {
+                    const err = document.createElement('div');
+                    err.textContent = post.error_message;
+                    err.className = 'text-sm text-red-600 mt-2';
+                    detailsBody.appendChild(err);
+                }
+                detailsModal.classList.remove('hidden');
+            });
+        });
+
+        if (closeDetails) {
+            closeDetails.addEventListener('click', function() {
+                detailsModal.classList.add('hidden');
+            });
+        }
+
+    });
+</script>
+<script>
+    window.max_retries = {{ max_retries }};
+</script>
+<script src="{{ url_for('static', filename='js/undo_state.js') }}"></script>
+<script src="{{ url_for('static', filename='js/repost_state.js') }}"></script>
+<script src="{{ url_for('static', filename='js/post_selection.js') }}"></script>
+<script src="{{ url_for('static', filename='js/post_status_poll.js') }}"></script>
+<script src="{{ url_for('static', filename='js/undo_post.js') }}"></script>
+<script src="{{ url_for('static', filename='js/repost_post.js') }}"></script>
+<script src="{{ url_for('static', filename='js/edit_schedule.js') }}"></script>
+{% endblock %}

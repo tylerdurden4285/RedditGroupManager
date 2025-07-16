@@ -1,0 +1,46 @@
+# Aider files
+.aider*
+
+# Environment variables
+.env
+.env*
+
+# Log files
+logs/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Docker-specific ignores
+Dockerfile
+docker-compose.yaml
+.dockerignore
+
+# Git files
+.git
+.gitignore
+
+# Other common ignores
+*.log
+*.sqlite3
+*.db
+instance/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+# Node
+node_modules/
+
+# Other
+changelog.txt

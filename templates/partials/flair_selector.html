@@ -1,0 +1,33 @@
+<!-- Flair selector partial -->
+<select
+  id="subreddit-flair"
+  name="flair_id"
+  class="block w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ 'bg-gray-100 text-gray-500' if not flairs or flairs|length == 0 else 'bg-white' }}"
+  {{ 'disabled' if not flairs or flairs|length == 0 }}
+  onchange="document.getElementById('flair-text').value = this.options[this.selectedIndex].dataset.flairText || '';"
+>
+  {% if error_message %}
+    <option value="" disabled selected>{{ error_message }}</option>
+  {% elif not flairs or flairs|length == 0 %}
+    <option value="" disabled selected>-- No flairs available --</option>
+  {% else %}
+    <option value="">-- Select a flair --</option>
+  {% endif %}
+  {% if flairs and flairs|length > 0 %}
+    {% for flair in flairs %}
+    <option value="{{ flair.id }}" data-flair-text="{{ flair.text }}">
+      {{ flair.text }}
+    </option>
+    {% endfor %}
+  {% endif %}
+</select>
+{% if error_message %}
+  <p class="text-xs text-red-600 mt-1">{{ error_message }}</p>
+{% endif %}
+<!-- Show loading indicator for additional fetches -->
+<div id="flair-loading" class="hidden absolute right-2 top-2">
+  <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+  </svg>
+</div>

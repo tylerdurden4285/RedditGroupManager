@@ -1,0 +1,84 @@
+version: "3.9"
+services:
+  migrate:
+    build: .
+    command: python run_migrations.py
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    networks:
+      - rgm_network
+
+  reddit:
+    build: .
+    command: python run.py
+    env_file: .env
+    volumes:
+      - .:/app
+    ports:
+      - "${FRONTEND_PORT:-5015}:${FRONTEND_PORT:-5015}"
+      - "${API_PORT:-8015}:${API_PORT:-8015}"
+    restart: unless-stopped
+    depends_on:
+      - migrate
+      - redis
+    networks:
+      - rgm_network
+
+  redis:
+    image: redis:7-alpine
+    env_file: .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - rgm_network
+
+  worker:
+    build: .
+    command: python worker.py posts default
+    env_file: .env
+    depends_on:
+      - migrate
+      - redis
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import os, redis; redis.Redis.from_url(os.environ.get(\"RQ_REDIS_URL\", \"redis://redis:6379\")).ping()'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - rgm_network
+
+  scheduler:
+    build: .
+    command: rqscheduler --url ${REDIS_URL:-redis://redis}:${REDIS_PORT:-6379}
+    env_file: .env
+    depends_on:
+      - migrate
+      - redis
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import os, redis; redis.Redis.from_url(os.environ.get(\"RQ_REDIS_URL\", \"redis://redis:6379\")).ping()'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - rgm_network
+
+networks:
+  rgm_network:
+    driver: bridge
+
+volumes:
+  redis_data:

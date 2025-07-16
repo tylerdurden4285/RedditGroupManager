@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Reddit Group Manager - Home{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Welcome to Reddit Group Manager</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                    <h3 class="text-xl font-semibold text-blue-800 mb-2">Groups</h3>
+                    <p class="text-gray-700 mb-4">Create and manage subreddit groups with customized flairs for your Reddit posts.</p>
+                    <a href="{{ url_for('groups.list_groups') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+                        Manage Groups
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="bg-purple-50 p-6 rounded-lg border border-purple-100">
+                    <h3 class="text-xl font-semibold text-purple-800 mb-2">Posts</h3>
+                    <p class="text-gray-700 mb-4">Create Reddit posts across your subreddit groups.</p>
+                    <a href="{{ url_for('posts_history.post_history') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700">
+                        Manage Posts
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+                
+            </div>
+            
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">System Status</h3>
+                <p class="text-gray-700 mb-4">Check the status of your Reddit API connection and application health.</p>
+                <a href="{{ url_for('main.system_status') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700">
+                    View Status
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

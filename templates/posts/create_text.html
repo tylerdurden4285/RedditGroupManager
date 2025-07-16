@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Text Post | Reddit Group Manager{% endblock %}
+
+{% block head_scripts %}
+{{ super() }}
+<style>
+    /* Increase content editor height to double the default */
+    #text_content_editor {
+        min-height: 12em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Create Text Post</h1>
+                    <p class="text-gray-600">Create and submit a new text post to Reddit</p>
+                </div>
+            </div>
+            
+            <form id="postForm" method="POST" action="{{ url_for('posts_create.create_text_post') }}" >
+                {{ form.csrf_token }}
+
+                <div class="mb-6">
+                    <label for="campaign" class="block text-sm font-medium text-gray-700 mb-1">{{ form.campaign.label }}</label>
+                    {{ form.campaign(class="w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-transparent", required=true) }}
+                </div>
+
+                <div class="mb-6">
+                    <label for="group_id" class="block text-sm font-medium text-gray-700 mb-1">Select Group</label>
+                    <select id="group_id" name="group_id" class="w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-transparent">
+                        <option value="0">Select a group...</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div id="group-subreddits" class="mt-2 text-sm text-gray-600"></div>
+                    <!-- Hidden field to hold the selected subreddit -->
+                    <input type="hidden" id="selected_subreddit" name="selected_subreddit" value="">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">{{ form.title.label }}</label>
+                    {{ form.title(class="w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-transparent", required=true, placeholder="Enter post title") }}
+                    <div class="mt-1 validation-error title-feedback"></div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="text_content_editor" class="block text-sm font-medium text-gray-700 mb-1">Post Content</label>
+                    {{ form.text_content(id="text_content", class="hidden") }}
+                    <div id="text_content_editor" class="quill-editor"></div>
+                    <div class="mt-1 validation-error text-content-feedback"></div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="comment_editor" class="block text-sm font-medium text-gray-700 mb-1">First Comment (Optional)</label>
+                    <textarea id="comment_text" name="comment_text" class="hidden"></textarea>
+                    <div id="comment_editor" class="quill-editor"></div>
+                    <div class="mt-1 validation-error comment-feedback"></div>
+                </div>
+
+                <div class="mb-6">
+                    <label id="schedule_time_label" data-timezone="{{ timezone_name }}" for="schedule_time" class="block text-sm font-medium text-gray-700 mb-1">Schedule Time (optional) - Currently: {{ timezone_name }} - {{ current_time }}</label>
+                    {{ form.schedule_time(class="w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm") }}
+                </div>
+                
+                <div class="flex items-center justify-between mt-8">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Submit Post</button>
+                    <a href="{{ url_for('posts_history.post_history') }}" class="text-red-500 hover:text-red-700">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block scripts %}
+<div id="group-warning-template" class="hidden">
+    {% include 'partials/group_warning.html' %}
+</div>
+<!-- Store data in a hidden div to avoid JavaScript syntax issues with Jinja2 templates -->
+<div id="groups-data" data-groups="{{ groups|tojson|safe }}" style="display:none;"></div>
+<!-- Data container for JavaScript - hidden from view -->
+<div id="direct-json-dump" style="display: none;">{{ groups|tojson(indent=4)|safe }}</div>
+<div id="debug-info" style="display: none;">
+    <pre id="raw-groups-data"></pre>
+    <div id="group-details"></div>
+</div>
+
+<script>
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing group selection handler');
+    
+    // Get DOM elements
+    var groupSelect = document.getElementById('group_id');
+    var groupSubredditsContainer = document.getElementById('group-subreddits');
+    var postForm = document.getElementById('postForm');
+    var titleInput = document.getElementById('title');
+    var titleFeedback = document.querySelector('.title-feedback');
+    var quillContent = new Quill('#text_content_editor', { theme: 'snow' });
+    var quillComment = new Quill('#comment_editor', { theme: 'snow' });
+
+    // Restore editor values if present (e.g., after validation failure)
+    var hiddenContent = document.getElementById('text_content');
+    if (hiddenContent && hiddenContent.value) {
+        quillContent.root.innerHTML = hiddenContent.value;
+    }
+    var hiddenComment = document.getElementById('comment_text');
+    if (hiddenComment && hiddenComment.value) {
+        quillComment.root.innerHTML = hiddenComment.value;
+    }
+
+    
+    // Get the raw JSON data from the pre element to avoid any data-attribute escaping issues
+    var directJsonDump = document.getElementById('direct-json-dump');
+    var groupsData = [];
+    
+    // Parse the raw JSON directly from the pre element content
+    try {
+        console.log('Attempting to parse groups data from direct JSON dump');
+        if (directJsonDump && directJsonDump.textContent) {
+            console.log('Direct JSON content length:', directJsonDump.textContent.length);
+            groupsData = JSON.parse(directJsonDump.textContent);
+            console.log('Successfully parsed direct JSON. Found', groupsData.length, 'groups');
+        } else {
+            console.error('Direct JSON dump element not found or empty');
+        }
+    } catch (e) {
+        console.error('Error parsing direct JSON data:', e);
+        // Fall back to the data attribute if direct JSON fails
+        try {
+            var groupsDataEl = document.getElementById('groups-data');
+            if (groupsDataEl && groupsDataEl.dataset.groups) {
+                console.log('Falling back to data attribute parsing');
+                groupsData = JSON.parse(groupsDataEl.dataset.groups);
+                console.log('Fallback successful, found', groupsData.length, 'groups');
+            }
+        } catch (fallbackErr) {
+            console.error('Fallback parsing also failed:', fallbackErr);
+        }
+    }
+    
+    // Dump the full groups data to console
+    console.log('GROUPS DATA:', groupsData);
+    
+    // Add debug info for each group
+    var debugInfo = document.getElementById('debug-info');
+    if (debugInfo) {
+        var rawDataPre = document.getElementById('raw-groups-data');
+        if (rawDataPre) {
+            rawDataPre.textContent = JSON.stringify(groupsData, null, 2);
+        }
+        
+        // Add a heading for the debug info
+        var debugHeading = document.createElement('h3');
+        debugHeading.textContent = 'Group Selection Debug - Check console (F12) for full details';
+        debugInfo.appendChild(debugHeading);
+        
+        // Log each group and its subreddits
+        if (Array.isArray(groupsData)) {
+            groupsData.forEach(function(group) {
+                console.log(`Group ID: ${group.id}, Name: ${group.name}`);
+                
+                // Add group data to debug info
+                var groupDebug = document.createElement('div');
+                groupDebug.innerHTML = `<h4>Group: ${group.name} (ID: ${group.id})</h4>`;
+                
+                if (group.subreddits && Array.isArray(group.subreddits) && group.subreddits.length > 0) {
+                    var subList = document.createElement('ul');
+                    group.subreddits.forEach(function(sub) {
+                        var subItem = document.createElement('li');
+                        subItem.textContent = `r/${sub.subreddit}`;
+                        subList.appendChild(subItem);
+                    });
+                    groupDebug.appendChild(subList);
+                } else {
+                    var noSubs = document.createElement('p');
+                    noSubs.textContent = 'No subreddits found or invalid subreddits structure';
+                    noSubs.style.color = 'red';
+                    groupDebug.appendChild(noSubs);
+                }
+                
+                debugInfo.appendChild(groupDebug);
+            });
+        } else {
+            console.error('Groups data is not an array:', typeof groupsData);
+        }
+    }
+    
+    // Update subreddit list when group changes
+    if (groupSelect) {
+        console.log('Group select found, initializing subreddit display logic');
+        
+        // Get the hidden field for selected subreddit
+        var selectedSubredditField = document.getElementById('selected_subreddit');
+        
+        // Function to update the subreddits list based on selected group
+        function updateSubredditsList() {
+            // Get the currently selected group ID
+            var selectedGroupId = parseInt(groupSelect.value);
+            console.log('Updating subreddits for group ID:', selectedGroupId);
+            
+            // Clear the selected subreddit field initially
+            if (selectedSubredditField) {
+                selectedSubredditField.value = '';
+            }
+            
+            // Only proceed if a valid group is selected
+            if (selectedGroupId > 0) {
+                console.log('Looking for group with ID:', selectedGroupId);
+                
+                // Find the selected group
+                var selectedGroup = null;
+                
+                if (Array.isArray(groupsData)) {
+                    // Log all available group IDs for debugging
+                    console.log('Available group IDs:', groupsData.map(g => g.id));
+                    
+                    // Use find() to locate the matching group
+                    selectedGroup = groupsData.find(function(group) {
+                        // Convert both to numbers for comparison
+                        return parseInt(group.id) === selectedGroupId;
+                    });
+                }
+                
+                console.log('Selected group found:', selectedGroup ? 'YES' : 'NO');
+                
+                // Proceed only if we found a matching group
+                if (selectedGroup) {
+                    console.log('Processing group:', selectedGroup.name);
+                    
+                    // Verify the subreddits array exists and has items
+                    if (selectedGroup.subreddits && 
+                        Array.isArray(selectedGroup.subreddits) && 
+                        selectedGroup.subreddits.length > 0) {
+                        
+                        console.log(`Group has ${selectedGroup.subreddits.length} subreddits`);
+                        
+                        // Set the selected subreddit to the first one in the group
+                        if (selectedSubredditField && selectedGroup.subreddits[0]) {
+                            var firstSubreddit = selectedGroup.subreddits[0].subreddit;
+                            selectedSubredditField.value = firstSubreddit;
+                            console.log('Set selected_subreddit field to:', firstSubreddit);
+                        }
+                        
+                        // Create a more visually appealing subreddit list with flairs
+                        var subredditsHtml = '<div class="mt-2">';
+                        subredditsHtml += '<span class="font-medium text-gray-700 mb-2 block">Will post to:</span>';
+                        subredditsHtml += '<div class="flex flex-wrap gap-2">';
+                        
+                        // Add each subreddit with its flair if available
+                        selectedGroup.subreddits.forEach(function(sub) {
+                            var hasFlair = sub.flair_text && sub.flair_text.trim() !== '';
+                            
+                            // Create a pill-style element for each subreddit
+                            subredditsHtml += '<div class="bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm flex items-center">';
+                            subredditsHtml += '<span class="font-medium">r/' + sub.subreddit + '</span>';
+                            
+                            // Add flair if available
+                            if (hasFlair) {
+                                subredditsHtml += '<span class="mx-1 text-gray-500">|</span>';
+                                subredditsHtml += '<span class="italic text-xs bg-blue-200 px-2 py-0.5 rounded">' + 
+                                                sub.flair_text + '</span>';
+                            }
+                            
+                            subredditsHtml += '</div>';
+                        });
+                        
+                        subredditsHtml += '</div></div>';
+                        
+                        console.log('Enhanced subreddits display created');
+                        
+                        // Update the container with the enhanced display
+                        groupSubredditsContainer.innerHTML = subredditsHtml;
+                    } else {
+                        console.log('No subreddits found for this group');
+                        groupSubredditsContainer.innerHTML = document.getElementById('group-warning-template').innerHTML;
+                        
+                        // Clear the selected subreddit field
+                        if (selectedSubredditField) {
+                            selectedSubredditField.value = '';
+                        }
+                    }
+                } else {
+                    console.error('Could not find group with ID:', selectedGroupId);
+                    groupSubredditsContainer.innerHTML = 
+                        '<div class="mt-2 bg-red-100 text-red-800 rounded-md px-4 py-3">' +
+                        '<div class="flex items-center">' +
+                        '<svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
+                        '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>' +
+                        '</svg>' +
+                        '<span class="font-medium">Error: Could not find selected group</span>' +
+                        '</div>' +
+                        '</div>';
+                        
+                    // Clear the selected subreddit field
+                    if (selectedSubredditField) {
+                        selectedSubredditField.value = '';
+                    }
+                }
+            } else {
+                // No group selected
+                console.log('No group selected');
+                groupSubredditsContainer.innerHTML = '';
+                
+                // Clear the selected subreddit field
+                if (selectedSubredditField) {
+                    selectedSubredditField.value = '';
+                }
+            }
+        }      
+        // Add change event listener to the group select
+        groupSelect.addEventListener('change', updateSubredditsList);
+        
+        // Trigger the update immediately if a group is pre-selected
+        console.log('Initial group select value:', groupSelect.value);
+        if (groupSelect.value && groupSelect.value !== '0') {
+            console.log('Group is pre-selected, triggering initial update');
+            // Use setTimeout to ensure all other initialization is complete
+            setTimeout(updateSubredditsList, 100);
+        }
+    } else {
+        console.error('Group select element not found!');
+    }
+    
+    // Form validation
+    if (postForm) {
+        postForm.addEventListener('submit', function(e) {
+            document.getElementById('text_content').value = quillContent.root.innerHTML;
+            document.getElementById('comment_text').value = quillComment.root.innerHTML;
+            const submitBtn = postForm.querySelector('button[type="submit"]');
+            var isValid = true;
+            
+            // Validate group selection
+            if (groupSelect && groupSelect.value === '0') {
+                groupSubredditsContainer.innerHTML = '<span class="validation-error">Please select a group</span>';
+                isValid = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // Validate title
+            if (titleInput && titleInput.value.trim() === '') {
+                titleFeedback.textContent = 'Post title is required';
+                titleFeedback.setAttribute('role', 'alert');
+                titleInput.classList.add('border-red-500');
+                isValid = false;
+            } else if (titleInput && titleInput.value.length > 300) {
+                titleFeedback.textContent = 'Title must be less than 300 characters';
+                titleFeedback.setAttribute('role', 'alert');
+                titleInput.classList.add('border-red-500');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            } else {
+                submitBtn.textContent = 'Submitting...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+    
+    // Clear validation errors on input
+    if (titleInput) {
+        titleInput.addEventListener('input', function() {
+            titleFeedback.textContent = '';
+            titleInput.classList.remove('border-red-500');
+            titleFeedback.removeAttribute('role');
+        });
+    }
+
+});
+</script>
+{% endblock %}

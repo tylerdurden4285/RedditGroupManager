@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}System Status | Reddit Group Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    System Status
+                </h3>
+                <a href="{{ url_for('main.index') }}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Back to Home
+                </a>
+            </div>
+            
+            <div class="px-6 py-6">
+                <p class="text-sm text-gray-500 mb-2">Current timezone: {{ timezone }}</p>
+                <p class="text-sm text-gray-500 mb-4">Version: {{ version }}</p>
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Service Status</h4>
+                    
+                    <div class="space-y-4">
+                        <!-- Database Status -->
+                        <div class="flex items-center justify-between p-4 border rounded-md">
+                            <div>
+                                <span class="font-medium">Database Connection</span>
+                                <p class="text-sm text-gray-500">{{ db_message }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center {% if db_status %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                <span class="{% if db_status %}text-green-500{% else %}text-red-500{% endif %}">
+                                    {% if db_status %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Reddit API Status -->
+                        <div class="flex items-center justify-between p-4 border rounded-md">
+                            <div>
+                                <span class="font-medium">Reddit API Connection</span>
+                                <p class="text-sm text-gray-500">{{ reddit_message }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center {% if reddit_status %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                <span class="{% if reddit_status %}text-green-500{% else %}text-red-500{% endif %}">
+                                    {% if reddit_status %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- API Server Status -->
+                        <div class="flex items-center justify-between p-4 border rounded-md">
+                            <div>
+                                <span class="font-medium">API Server</span>
+                                <p class="text-sm text-gray-500">{{ api_message }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center {% if api_status %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                <span class="{% if api_status %}text-green-500{% else %}text-red-500{% endif %}">
+                                    {% if api_status %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Redis Server Status -->
+                        <div class="flex items-center justify-between p-4 border rounded-md">
+                            <div>
+                                <span class="font-medium">Redis Server</span>
+                                <p class="text-sm text-gray-500">{{ redis_message }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center {% if redis_status %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                <span class="{% if redis_status %}text-green-500{% else %}text-red-500{% endif %}">
+                                    {% if redis_status %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Scheduler Status -->
+                        <div class="flex items-center justify-between p-4 border rounded-md">
+                            <div>
+                                <span class="font-medium">Scheduler</span>
+                                <p class="text-sm text-gray-500">{{ scheduler_message }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center {% if scheduler_status %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                <span class="{% if scheduler_status %}text-green-500{% else %}text-red-500{% endif %}">
+                                    {% if scheduler_status %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center">
+                    <button onclick="window.location.reload()" class="px-4 py-2 bg-blue-500 text-white rounded-full shadow-sm text-sm font-medium hover:bg-blue-600 transition-colors">
+                        Refresh Status
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

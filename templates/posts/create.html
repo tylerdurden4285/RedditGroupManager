@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Create Post | Reddit Group Manager{% endblock %}
+
+{% block head_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/select2.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h1 class="mb-2">Create Reddit Post</h1>
+                    <p class="lead mb-0">Create and submit a new post to Reddit</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form id="postForm" method="POST" action="{{ url_for('posts_create.create_post') }}" >
+                        {{ form.csrf_token }}
+                        {{ form.errors }}
+
+                        <div class="mb-3">
+                            <label for="campaign" class="form-label">{{ form.campaign.label }}</label>
+                            {{ form.campaign(class="form-control", required=true) }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">{{ form.title.label }}</label>
+                            {{ form.title(class="form-control", required=true) }}
+                            <div class="invalid-feedback validation-error title-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.content_type.label }}</label>
+                            <div class="btn-group w-100" role="group" aria-label="Content Type">
+                                {% for value, label in form.content_type.choices %}
+                                <input type="radio" class="btn-check" name="content_type" id="content_type_{{ value }}"
+                                       value="{{ value }}" {{ 'checked' if form.content_type.data == value else '' }}
+                                       autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="content_type_{{ value }}">{{ label }}</label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3 content-section" id="text-content-section">
+                            <label for="text_content" class="form-label">{{ form.text_content.label }}</label>
+                            {{ form.text_content(class="form-control", rows=6) }}
+                            <div class="invalid-feedback validation-error text-content-feedback"></div>
+                        </div>
+
+                        <div class="mb-3 content-section" id="link-content-section" style="display: none;">
+                            <label for="link_url" class="form-label">{{ form.link_url.label }}</label>
+                            {{ form.link_url(class="form-control", placeholder="https://") }}
+                            <div class="invalid-feedback validation-error link-url-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Post To</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="post_target" id="post_to_group" value="group" checked>
+                                <label class="form-check-label" for="post_to_group">
+                                    Post to Group
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="post_target" id="post_to_subreddit" value="subreddit">
+                                <label class="form-check-label" for="post_to_subreddit">
+                                    Post to Single Subreddit
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 post-target-section" id="group-target-section">
+                            <label for="group_id" class="form-label">{{ form.group_id.label }}</label>
+                            {{ form.group_id(class="form-select") }}
+                            <div class="invalid-feedback validation-error group-id-feedback"></div>
+                        </div>
+
+                        <div class="mb-3 post-target-section" id="subreddit-target-section" style="display: none;">
+                            <label for="subreddit" class="form-label">{{ form.subreddit.label }}</label>
+                            {{ form.subreddit(class="form-control", placeholder="Enter subreddit name") }}
+                            <div class="invalid-feedback validation-error subreddit-feedback"></div>
+                            
+                            <div class="mt-3" id="flair-container">
+                                <button type="button" id="loadFlairsBtn" class="btn btn-outline-secondary btn-sm" disabled>
+                                    Load Flairs
+                                </button>
+                                <div id="flair-selector" class="mt-2" style="display: none;">
+                                    <label class="form-label">Select Flair (Optional)</label>
+                                    <select id="flair-select" class="form-select">
+                                        <option value="">No flair</option>
+                                    </select>
+                                    {{ form.flair_id(id="selected-flair-id") }}
+                                </div>
+                                <div id="flair-loading" class="mt-2 text-center" style="display:none;">
+                                    {% include 'partials/loading_spinner.html' %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-3" id="testModeInfo" style="display: none;">
+                            <strong>Test Mode Active</strong> - Posts will only be submitted to approved test subreddits.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" id="submitBtn" class="btn btn-success">Submit Post</button>
+                            <a href="{{ url_for('posts_history.post_history') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Help</h5>
+                </div>
+                <div class="card-body">
+                    <h6>About Posting</h6>
+                    <p>
+                        You can create either a text post or a link post and submit it to either an entire group
+                        of subreddits or a single subreddit.
+                    </p>
+
+                    <h6>Post Types</h6>
+                    <ul>
+                        <li><strong>Text Post</strong>: Contains a title and optional text content.</li>
+                        <li><strong>Link Post</strong>: Contains a title and a link to external content.</li>
+                    </ul>
+
+                    <h6>Post Targets</h6>
+                    <ul>
+                        <li><strong>Group</strong>: Post to all subreddits in a selected group.</li>
+                        <li><strong>Single Subreddit</strong>: Post to a specific subreddit.</li>
+                    </ul>
+
+                    <h6>Flairs</h6>
+                    <p>
+                        When posting to a single subreddit, you can select an optional flair.
+                        Click "Load Flairs" to retrieve available flairs for the specified subreddit.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/post_create.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the post creation page with proper JSON data
+        const groups = {{ groups|tojson|safe }} || [];
+        initPostCreatePage(groups);
+    });
+</script>
+{% endblock %}

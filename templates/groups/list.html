@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Reddit Groups{% endblock %}
+
+{% block content %}
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header with title and create button -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h2 class="text-2xl font-bold text-[#1b0e0f]">Your Groups</h2>
+            <a href="{{ url_for('groups.new_group') }}"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="mr-2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Create Group
+            </a>
+        </div>
+
+        <!-- Groups Grid and Empty State -->
+        <div id="groups-container">
+            <div id="no-groups" class="text-center py-12 px-4 bg-white rounded-lg border-2 border-dashed border-gray-300 {% if groups %}hidden{% endif %}">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No groups yet</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new group.</p>
+                <div class="mt-6">
+                    <a href="{{ url_for('groups.new_group') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        New Group
+                    </a>
+                </div>
+            </div>
+            {% if groups %}
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+                {% for group in groups %}
+                <div id="group-{{ group.id }}" class="group-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
+                <div class="p-4 flex-grow">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">{{ group.name }}</h3>
+                        <div class="flex space-x-4">
+                            <a href="{{ url_for('groups.edit_group', group_id=group.id) }}"
+                               class="text-gray-400 hover:text-blue-500 transition-colors"
+                               title="Edit Group">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </a>
+                            <button
+                                class="text-gray-400 hover:text-red-500 transition-colors"
+                                hx-delete="{{ url_for('groups.delete_group', group_id=group.id) }}"
+                                hx-confirm="Are you sure you want to delete this group? This cannot be undone."
+                                hx-target="#group-{{ group.id }}"
+                                hx-swap="outerHTML"
+                                title="Delete Group">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {% if group.description %}
+                    <p class="text-gray-600 text-sm mb-4">{{ group.description }}</p>
+                    {% else %}
+                    <p class="text-gray-400 text-sm italic mb-4">No description</p>
+                    {% endif %}
+
+                    <div class="mt-2">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Subreddits ({{ group.subreddits|length }})</h4>
+                        {% if group.subreddits %}
+                        <ul class="divide-y divide-gray-100 border border-gray-100 rounded-md overflow-hidden">
+                            {% for subreddit in group.subreddits %}
+                            <li class="px-3 py-2 text-sm bg-white hover:bg-gray-50">
+                                <div class="flex flex-col space-y-1">
+                                    <div class="flex items-center">
+                                        <span class="text-gray-700">r/{{ subreddit.subreddit }}</span>
+                                        <a href="https://www.reddit.com/r/{{ subreddit.subreddit }}" target="_blank" rel="noopener noreferrer" class="ml-1 text-blue-600 hover:text-blue-800">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </a>
+                                        {% if subreddit.flair_text %}
+                                        <span class="ml-2 inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">{{ subreddit.flair_text }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if subreddit.description %}
+                                    <div class="text-xs text-gray-500">{{ subreddit.description }}</div>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-gray-400 text-sm italic">No subreddits added yet</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center text-xs mt-auto">
+                    <span class="text-gray-500">Created: {{ group.created_at.strftime('%Y-%m-%d') }}</span>
+                    <a href="#" class="text-blue-500 hover:text-blue-600 font-medium">POST</a>
+                </div>
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}

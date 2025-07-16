@@ -1,0 +1,22 @@
+2025-06-13 Removed page spinner overlay and related scripts
+2025-06-11 Page spinner overlay enabled on all primary pages
+2025-06-08 Added DATABASE_PATH env handling in db.get_connection
+2025-06-08 Moved legacy Flask modules into legacy/ directory and updated start_servers.sh
+2025-06-08 Removed Prefect from posting flow
+2025-06-08 Initialize DB for FastAPI app
+2025-06-08 Removed Prefect references and flow
+2025-06-08 Updated logging to use service-based file names
+2025-06-08 Documented running tests with Poetry and uv in README
+2025-06-08 Removed log files with leaked username
+2025-06-08 Removed SQLite database files from version control
+2025-06-08 Added environment variable validation in RedditService
+2025-06-08 Removed FastAPI modules and pytest tests to simplify frontend-only setup
+2025-06-08 Removed post creation routes and templates
+2025-06-08 Fixed delete_failed_posts to return accurate count
+
+2025-06-11 Changed requeue feature to repost and update post history entry
+2025-06-11 Post history displays local date and time per timezone
+2025-06-12 Fixed NameError in GroupService migrations by importing os
+2025-06-12 Ensured date picker text is visible and calendar uses light theme on posts page
+2025-06-13 Prevented line break on "Reset Dates" button in post history page
+2025-07-15 Added overdue post status for missed schedules and rescheduling

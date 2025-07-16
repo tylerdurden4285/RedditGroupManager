@@ -1,0 +1,158 @@
+/* Main stylesheet for Reddit Group Manager */
+:root {
+    --color-bg: #f8f9fa;
+    --color-text: #333;
+    --color-card: #ffffff;
+    --color-border: #ddd;
+}
+
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    /* Remove bottom padding that caused extra space below the footer */
+    padding-bottom: 0;
+}
+
+.footer {
+    width: 100%;
+    background-color: var(--color-card);
+    border-top: 1px solid var(--color-border);
+    padding: 0.5rem 0;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+.card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.card-header {
+    background-color: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: bold;
+}
+
+
+.btn {
+    border-radius: 9999px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Subreddit item styling */
+.subreddit-item {
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: var(--color-card);
+}
+
+.subreddit-actions {
+    text-align: right;
+}
+
+/* Group list styles */
+.group-card {
+    transition: all 0.2s ease;
+}
+
+.group-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* HTMX indicator styles */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+.htmx-request .htmx-indicator {
+    opacity: 1
+}
+.htmx-request.htmx-indicator {
+    opacity: 1
+}
+
+/* Basic size for Quill editors */
+.quill-editor {
+    min-height: 300px;
+    resize: vertical;
+}
+.quill-editor .ql-editor {
+    min-height: inherit;
+    font-size: 1rem;
+}
+
+/* Specific editor sizes */
+#text_content_editor {
+    min-height: 180px;
+}
+
+#comment_editor {
+    min-height: 90px;
+}
+
+
+/* Ensure date pickers use the light color scheme to match the white fields */
+html {
+    color-scheme: light;
+}
+.date-input {
+    color-scheme: light;
+    background-color: #fff;
+    color: #1b0e0f; /* ensure text remains visible */
+}
+/* Flatpickr attaches this class; ensure it matches date-input styling */
+.flatpickr-input {
+    color-scheme: light;
+    background-color: #fff;
+    color: #1b0e0f;
+}
+/* Keep calendar icons dark against the light background */
+.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+}
+.date-input::-moz-calendar-picker-indicator {
+    filter: invert(0);
+}
+
+#reset-dates-btn {
+    height: 42px;
+}
+
+/* Shared validation error style */
+.validation-error {
+    color: #dc2626; /* Tailwind's text-red-600 */
+    font-size: 0.875rem; /* text-sm */
+}
+

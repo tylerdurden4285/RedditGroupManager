@@ -1,0 +1,33 @@
+<!-- Flair selector error partial -->
+<div class="flex flex-col space-y-2">
+  <select
+    id="subreddit-flair"
+    name="flair_id"
+    class="block w-full px-3 py-2 rounded-md border border-red-300 focus:ring-2 focus:ring-blue-200 focus:border-transparent sm:text-sm bg-red-50 text-red-800"
+    disabled
+  >
+    <option value="">Error loading flairs</option>
+  </select>
+  
+  <div class="flex items-center text-sm text-red-600">
+    <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+  
+  <!-- Retry button -->
+  <button 
+    type="button"
+    class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    hx-get="/api/v1/reddit/flair-selector/{{ subreddit }}"
+    hx-target="#flair-selector-container"
+    hx-swap="innerHTML"
+    hx-headers='{"Authorization": "{{ auth_key }}"}'
+  >
+    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+    </svg>
+    Try Again
+  </button>
+</div>

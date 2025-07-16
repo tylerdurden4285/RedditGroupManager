@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Reddit Group Manager{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quill.snow.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Ensure Quill editors start with enough space for roughly five lines of text */
+        .quill-editor {
+            min-height: 6em;
+            resize: vertical;
+        }
+        .quill-editor .ql-editor {
+            min-height: inherit;
+            font-size: 1rem;
+        }
+        /* Highlight the full editor when any child receives focus */
+        .quill-editor:focus-within {
+            border-color: rgb(59, 130, 246); /* tailwind blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11" crossorigin="anonymous"></script>
+    {{ toastr.include_jquery() }}
+    {{ toastr.include_toastr_css() }}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        #toast-container > .toast {
+            opacity: 1;
+        }
+    </style>
+
+    {% block head_scripts %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %} class="bg-[#fcf8f8] text-[#1b0e0f] min-h-screen flex flex-col" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+    {% block nav %}
+    <header class="bg-white border-b border-solid border-b-[#f3e7e8] px-4 sm:px-6 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4 text-[#1b0e0f]">
+                <a href="{{ url_for('main.index') }}" class="flex items-center gap-4">
+                    <div class="size-8">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
+                                fill="currentColor"
+                                class="text-red-500"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-[#1b0e0f]">Reddit Group Manager</h1>
+                </a>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                    <a href="{{ url_for('main.index') }}" class="text-[#1b0e0f] hover:text-gray-700">Home</a>
+                    <a href="{{ url_for('groups.list_groups') }}" class="text-[#1b0e0f] hover:text-gray-700">Groups</a>
+                    <a href="{{ url_for('posts_history.post_history') }}" class="text-[#1b0e0f] hover:text-gray-700">Posts</a>
+                    <a href="{{ url_for('main.system_status') }}" class="text-[#1b0e0f] hover:text-gray-700">Status</a>
+                </div>
+            <div class="flex items-center gap-2 md:hidden">
+                <button id="mobile-menu-button" class="text-[#1b0e0f] hover:text-gray-700 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+    <nav id="mobile-menu" class="hidden md:hidden bg-white border-b border-solid border-b-[#f3e7e8]">
+        <div class="px-4 py-3 space-y-1">
+            <a href="{{ url_for('main.index') }}" class="block text-[#1b0e0f] hover:bg-gray-100 rounded-full px-2 py-1">Home</a>
+            <a href="{{ url_for('groups.list_groups') }}" class="block text-[#1b0e0f] hover:bg-gray-100 rounded-full px-2 py-1">Groups</a>
+            <a href="{{ url_for('posts_history.post_history') }}" class="block text-[#1b0e0f] hover:bg-gray-100 rounded-full px-2 py-1">Posts</a>
+            <a href="{{ url_for('main.system_status') }}" class="block text-[#1b0e0f] hover:bg-gray-100 rounded-full px-2 py-1">Status</a>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <!-- Reddit Account Info Bar -->
+    <div class="bg-gray-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center text-sm font-medium text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Reddit account:
+                {% if reddit_connected %}
+                    <a href="https://www.reddit.com/user/{{ reddit_username }}" class="text-green-600 font-semibold ml-1 flex items-center gap-1">
+                        {{ reddit_username }}<span class="size-2 rounded-full bg-green-500 inline-block"></span>
+                    </a>
+                {% else %}
+                    <span class="text-red-500 font-semibold ml-1 flex items-center gap-1">
+                        {{ reddit_username }}<span class="size-2 rounded-full bg-red-500 inline-block"></span>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden container for flash messages -->
+    <div id="flask-messages" class="hidden">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message" data-category="{{ category }}" data-message="{{ message|safe }}"></div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer bg-white">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 text-sm">
+                &copy; {{ current_year }} Reddit Group Manager. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('mobile-menu-button');
+            const menu = document.getElementById('mobile-menu');
+            btn.addEventListener('click', function() {
+                menu.classList.toggle('hidden');
+            });
+
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/quill.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/purify.min.js') }}"></script>
+    <!-- Main helpers for HTMX events and toast handling -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        if (window.Quill) {
+            const Link = window.Quill.import('formats/link');
+            const originalSanitize = Link.sanitize;
+            Link.sanitize = function(url) {
+                let value = originalSanitize.call(this, url);
+                if (value && !/^(?:https?:|mailto:|ftp:|tel:)/i.test(value)) {
+                    value = 'https://' + value;
+                }
+                return value;
+            };
+            window.Quill.register(Link, true);
+        }
+    </script>
+
+    {# Debug logging control #}
+    <script>
+        const DEBUG = {{ 'true' if debug else 'false' }};
+        if (!DEBUG) {
+            console.log = function() {};
+            console.debug = function() {};
+        }
+    </script>
+
+    <!-- Additional scripts from child templates -->
+    {% block scripts %}{% endblock %}
+    {{ toastr.include_toastr_js() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashes = document.querySelectorAll('#flask-messages .flash-message');
+            if (flashes.length && window.toastr) {
+                flashes.forEach(function(el) {
+                    const msg = el.getAttribute('data-message');
+                    const category = el.getAttribute('data-category');
+                    if (typeof toastr[category] === 'function') {
+                        toastr[category](msg);
+                    } else {
+                        toastr.info(msg);
+                    }
+                });
+            }
+        });
+    </script>
+    <!-- No additional scripts needed here -->
+</body>
+</html>
