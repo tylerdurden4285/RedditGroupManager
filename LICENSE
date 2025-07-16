@@ -1,3 +1,17 @@
+Reddit Group Manager
+License: Apache License 2.0 WITH Commons Clause + Service/Hosting Carve‑Out + Contributor Commercial Grant
+Version: 2025-07-16
+
+IMPORTANT SUMMARY (NON‑BINDING):
+- Source‑available: You may use, modify, and self‑host (for yourself or clients) under Apache 2.0 terms.
+- You may charge for labor, integration, hosting, or support related to deployments.
+- You may NOT sell, rebrand, or offer Reddit Group Manager (or a substantially similar hosted product) as your own paid software/SaaS without a separate commercial agreement with the Licensor.
+- Contributors license their contributions to the Licensor so a premium/commercial edition can be produced.
+
+================================================================
+BEGIN APACHE LICENSE 2.0 TEXT (UNMODIFIED; DO NOT EDIT THIS BLOCK)
+================================================================
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -199,3 +213,161 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+==============================================================
+END APACHE LICENSE 2.0 TEXT
+==============================================================
+
+
+==============================================================
+COMMONS CLAUSE LICENSE CONDITION v1.0
+==============================================================
+Software: Reddit Group Manager
+License: Apache License, Version 2.0
+Licensor: GitHub user "tylerdurden4285" (https://github.com/tylerdurden4285)
+
+The Software is provided to you by the Licensor under the License, as defined above, subject to the following condition.
+
+Without limiting other conditions in the License, the grant of rights under the License will not include, and the License does not grant to you, the right to Sell the Software.
+
+For purposes of the foregoing, “Sell” means practicing any or all of the rights granted to you under the License to provide to third parties, for a fee or other consideration (including without limitation fees for hosting or consulting/support services related to the Software), a product or service whose value derives, entirely or substantially, from the functionality of the Software. Any license notice or attribution required by the License must also include this Commons Clause License Condition.
+
+==============================================================
+END COMMONS CLAUSE LICENSE CONDITION v1.0
+==============================================================
+
+
+==============================================================
+SERVICE / HOSTING CARVE‑OUT (ADDITIONAL PERMISSION)
+==============================================================
+Notwithstanding the Commons Clause License Condition above, the following activities are expressly permitted and are NOT considered “Sell” for purposes of this License, so long as you comply with the Apache License terms and do not violate the Prohibited Commercialization clause below:
+
+1. Deploying, operating, and modifying the Software for your own internal business purposes.
+2. Deploying, operating, and modifying the Software on behalf of your clients (managed / “for hire” deployments) and charging for labor, integration, configuration, customization, training, support, or pass‑through infrastructure/hosting costs.
+3. Including the Software as a component within a broader services engagement where the fees are primarily for your services and not for licensing access to the Software as a stand‑alone commercial product.
+
+This Additional Permission is granted solely by the Licensor identified above and applies to all copies of the Software that include this notice.
+
+
+==============================================================
+PROHIBITED COMMERCIALIZATION
+==============================================================
+Except under a separate written commercial agreement with the Licensor, you may NOT:
+
+A. Market, license, sell, lease, or otherwise provide the Software (or a substantially similar fork) to third parties as a paid, stand‑alone software product under your own brand.
+B. Offer the Software’s primary functionality to third parties as a paid, stand‑alone hosted / SaaS / cloud service where the principal value received by the customer is access to the Software itself rather than to your broader services described in the Carve‑Out above.
+C. Remove, obscure, or replace the project name “Reddit Group Manager” in a manner that misleads recipients into believing your offering is an original, independently created product.
+
+
+==============================================================
+CONTRIBUTOR COMMERCIAL GRANT TO LICENSOR
+==============================================================
+By submitting a Contribution (as defined in Apache License §1) to the project repository (currently https://github.com/tylerdurden4285/redditgroupmanager) you agree that:
+
+1. Your Contribution is licensed to all recipients under this License (Apache 2.0 WITH Commons Clause + Service/Hosting Carve‑Out + Contributor Commercial Grant).
+2. In addition, you grant to the Licensor (GitHub user "tylerdurden4285", and any successor that assumes control of the repository) a perpetual, worldwide, irrevocable, non‑exclusive, royalty‑free license (with the right to sublicense) to use, reproduce, prepare derivative works of, publicly perform, publicly display, distribute, and relicense your Contribution (including under different terms, including proprietary/commercial licenses) as part of any version or edition of Reddit Group Manager or derivative products offered by the Licensor.
+3. You represent that you have the right to grant the foregoing licenses for any Contribution you submit.
+4. If you do not agree, do not submit Contributions.
+
+
+==============================================================
+COPYRIGHT NOTICE FOR THIS PROJECT
+==============================================================
+Copyright (c) 2025 GitHub user "tylerdurden4285"
+
+
+==============================================================
+THIRD‑PARTY NOTICES
+==============================================================
+This project includes or depends on third‑party packages. Their licenses are reproduced or referenced below to satisfy redistribution obligations. Where identical standard license text (MIT, BSD‑2, BSD‑3, Apache‑2.0) governs multiple packages, the text appears once and applies to each package listed under that heading.
+
+--- INDEX ---
+Apache-2.0: requests
+BSD-2-Clause: PRAW; prawcore
+BSD-3-Clause: python-dotenv; uvicorn; Flask; Flask-WTF; Flask-SQLAlchemy; WTForms; rq; rq-scheduler
+MIT: fastapi; pydantic; pydantic-settings; pydantic-extra-types; flask-cors; Flask-Toastr; markdownify; rq-dashboard-fast; redis (redis-py); alembic
+
+(Version numbers per requirements.txt constraints; confirm actual installed versions when distributing binaries or source bundles.)
+
+-------------------------
+APACHE LICENSE 2.0 (requests)
+-------------------------
+Requests is licensed under the Apache License, Version 2.0.
+See full Apache License 2.0 text in the main body above; that text satisfies attribution for requests.
+Additional attribution: Requests © Kenneth Reitz and Requests contributors.
+
+-------------------------
+BSD 2‑CLAUSE LICENSE (PRAW; prawcore)
+-------------------------
+PRAW: The Python Reddit API Wrapper
+Copyright (c) PRAW Authors
+prawcore: PRAW Core Components
+Copyright (c) PRAW Authors
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-------------------------
+BSD 3‑CLAUSE LICENSE (python-dotenv; uvicorn; Flask; Flask-WTF; Flask-SQLAlchemy; WTForms; rq; rq-scheduler)
+-------------------------
+The following packages each include a 3‑Clause (a/k/a “New” or “Modified”) BSD license; copyrights as noted:
+
+python-dotenv © Saurabh Kukade, Sebastien Bommersbach, and contributors.
+uvicorn © Encode OSS Ltd. and contributors.
+Flask © Pallets Projects authors.
+Flask-WTF © Dan Jacob and contributors.
+Flask-SQLAlchemy © Armin Ronacher, Pallets Projects, and contributors.
+WTForms © WTForms Authors.
+rq (Redis Queue) © nvie & contributors.
+rq-scheduler © RQ Scheduler Authors.
+
+BSD 3‑Clause text:
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name(s) of the above‑listed project(s) nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-------------------------
+MIT LICENSE (fastapi; pydantic; pydantic-settings; pydantic-extra-types; flask-cors; Flask-Toastr; markdownify; rq-dashboard-fast; redis (redis-py); alembic)
+-------------------------
+fastapi © Sebastián Ramírez and FastAPI contributors.
+pydantic; pydantic-settings; pydantic-extra-types © Pydantic Services Inc. and contributors.
+flask-cors © Cory Dolphin and contributors.
+Flask-Toastr © Flask-Toastr Authors.
+markdownify © Mike Boers and contributors.
+rq-dashboard-fast © rq-dashboard-fast Authors.
+redis (redis-py) © Redis Inc. and contributors.
+alembic © Mike Bayer and contributors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==============================================================
+END THIRD‑PARTY NOTICES
+==============================================================
