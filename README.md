@@ -1,6 +1,15 @@
 # Reddit Group Manager
 A self hostable docker application that lets you make custom group lists of subreddits and post to them in bulk. It has a Rest API and scheduling feature also. Built in collaboration with Ai (yes I know boo right) but I've found it incredibly useful and want to share it here for public use. 
 
+<img width="1280" height="720" alt="Screenshot from 2025-07-16 19-53-17" src="https://github.com/user-attachments/assets/9101097d-fcf1-4201-9617-78410eac9f0a" />
+
+<img width="1280" height="720" alt="Screenshot from 2025-07-16 19-55-54" src="https://github.com/user-attachments/assets/a3dd4f39-bfbd-4309-8a58-dbcd7dc4e164" />
+
+<img width="1280" height="720" alt="Screenshot from 2025-07-16 19-56-00" src="https://github.com/user-attachments/assets/0f165950-d818-4052-af71-fe7733babcdf" />
+
+<img width="1280" height="720" alt="Screenshot from 2025-07-16 19-55-42" src="https://github.com/user-attachments/assets/eda4dfbf-74d4-49bb-9e22-76069548b257" />
+
+
 THIS README IS UNDER CONSTRUCTION. IF SOMETHING IS NOT CLEAR PLEASE CREATE AN ISSUE AND I WILL FIX IT. THANKS!
 
 TLDR (Aka: Get to the point, how do I install it?)
