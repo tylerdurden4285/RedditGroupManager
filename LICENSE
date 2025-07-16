@@ -9,7 +9,7 @@ IMPORTANT SUMMARY (NON‑BINDING):
 - Contributors license their contributions to the Licensor so a premium/commercial edition can be produced.
 
 ================================================================
-BEGIN APACHE LICENSE 2.0 TEXT (UNMODIFIED; DO NOT EDIT THIS BLOCK)
+APACHE LICENSE 2.0
 ================================================================
 
                                  Apache License
@@ -200,7 +200,7 @@ BEGIN APACHE LICENSE 2.0 TEXT (UNMODIFIED; DO NOT EDIT THIS BLOCK)
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2025 tylerdurden4285
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -213,11 +213,6 @@ BEGIN APACHE LICENSE 2.0 TEXT (UNMODIFIED; DO NOT EDIT THIS BLOCK)
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-==============================================================
-END APACHE LICENSE 2.0 TEXT
-==============================================================
-
 
 ==============================================================
 COMMONS CLAUSE LICENSE CONDITION v1.0
@@ -367,7 +362,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-==============================================================
-END THIRD‑PARTY NOTICES
-==============================================================
