@@ -18,6 +18,15 @@ A self hostable docker application that lets you make custom group lists of subr
 2. docker compose up --build -d
 3. Go to the ports you selected (default is 5015 for frontend and 8015 for backend API)
 
+If you just want to run the API locally without Docker you can start it with
+`serve_api.py`. This script loads `.env` and falls back to sensible defaults:
+
+```bash
+python serve_api.py
+```
+
+It uses `API_HOST` and `API_PORT` from your `.env` file if they are set.
+
 ENJOY!
 
 ## What can you do with it? 
