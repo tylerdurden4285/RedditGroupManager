@@ -1,7 +1,7 @@
-THIS README IS UNDER CONSTRUCTION. IF SOMETHING IS NOT CLEAR PLEASE CREATE AN ISSUE AND I WILL FIX IT. THANKS!
+THIS IS UNDER CONSTRUCTION AND I RECOMMEND ONLY USING ON THROWAWAY ACCOUNTS TO AVOID ANY BANS THAT REDDIT MIGHT IMPOSE ON YOUR ACCOUNT. 
 
 # Reddit Group Manager
-A self hostable docker application that lets you make custom group lists of subreddits and post to them in bulk. It has a Rest API and scheduling feature also. Built in collaboration with Ai (yes I know boo right) but I've found it incredibly useful and want to share it here for public use. Important: If misused this has the potential to get your reddit account suspended so be warned and use it responsibly. 
+A self hostable docker application that lets you make custom group lists of subreddits and post to them in bulk. It has a Rest API and scheduling feature also. Built in collaboration with Ai (yes I know boo right) but I've found it incredibly useful and want to share it here for public use. If misused this has the potential to get your reddit account suspended so be warned and use it responsibly. 
 
 <img width="1280" height="720" alt="Screenshot from 2025-07-16 19-53-17" src="https://github.com/user-attachments/assets/9101097d-fcf1-4201-9617-78410eac9f0a" />
 
